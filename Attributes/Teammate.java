@@ -1,4 +1,4 @@
-package Dictators;
+package Dictators.Attributes;
 
 /**
  * Created by Thomas on 27-02-17.

@@ -1,4 +1,4 @@
-package Dictators;
+package Dictators.Attributes;
 
 import java.util.ArrayList;
 

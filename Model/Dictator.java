@@ -1,5 +1,7 @@
-package Dictators;
+package Dictators.Model;
 
+import Dictators.Attributes.Teammate;
+import Dictators.Attributes.Teams;
 import populations.EnemyBot;
 import robocode.*;
 
@@ -108,7 +110,7 @@ public class Dictator extends TeamRobot {
         Double y = Double.parseDouble(messagesplit[2]);
         teammates.add(new Teammate(name, x, y));
         if(messages == 3) {
-         team = new Teams(teammates, this.getName());
+            team = new Teams(teammates, this.getName());
         }
         messages++;
     }
