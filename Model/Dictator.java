@@ -47,37 +47,41 @@ public class Dictator extends TeamRobot {
      */
     public void onScannedRobot(ScannedRobotEvent e) {
 
-        // Don't fire on teammates
-        if (isTeammate(e.getName())) {
-            return;
-        }
+      // Don't fire on teammates
+     if (isTeammate(e.getName())) {
+         return;
+     }
 
-        // Keeps track of enemy bot currently being scanned
-        if (enemy.none() || e.getDistance() < enemy.getDistance() || e.getName().equals(enemy.getName())) {
-            enemy.update(e);
-        }
+     // Keeps track of enemy bot currently being scanned
+     if (enemy.none() || e.getDistance() < enemy.getDistance() || e.getName().equals(enemy.getName())) {
+         enemy.update(e);
+     }
 
-        double absBearing = e.getBearingRadians() + getHeadingRadians();//enemies absolute bearing
-        double latVel = e.getVelocity() * Math.sin(e.getHeadingRadians() - absBearing);//enemies later velocity
-        double gunTurnAmt;//amount to turn our gun
-        setTurnRadarLeftRadians(getRadarTurnRemainingRadians());//lock on the radar
+     double absBearing = e.getBearingRadians() + getHeadingRadians();//enemies absolute bearing
+     double latVel = e.getVelocity() * Math.sin(e.getHeadingRadians() - absBearing);//enemies later velocity
+     double gunTurnAmt;//amount to turn our gun
+     setTurnRadarLeftRadians(getRadarTurnRemainingRadians());//lock on the radar
 
-        if (Math.random() > .9) {
-            setMaxVelocity((12 * Math.random()) + 12);//randomly change speed
-        }
-        if (e.getDistance() > 150) {//if distance is greater than 150
-            gunTurnAmt = robocode.util.Utils.normalRelativeAngle(absBearing - getGunHeadingRadians() + latVel / 22);//amount to turn our gun, lead just a little bit
-            setTurnGunRightRadians(gunTurnAmt); //turn our gun
-            setTurnRightRadians(robocode.util.Utils.normalRelativeAngle(absBearing - getHeadingRadians() + latVel / getVelocity()));//drive towards the enemies predicted future location
-            setAhead((e.getDistance() - 140) * moveDirection);//move forward
-            setFire(3);//fire
-        } else {//if we are close enough...
-            gunTurnAmt = robocode.util.Utils.normalRelativeAngle(absBearing - getGunHeadingRadians() + latVel / 15);//amount to turn our gun, lead just a little bit
-            setTurnGunRightRadians(gunTurnAmt);//turn our gun
-            setTurnLeft(-90 - e.getBearing()); //turn perpendicular to the enemy
-            setAhead((e.getDistance() - 140) * moveDirection);//move forward
-            setFire(3);//fire
-        }
+     if (Math.random() > .9) {
+         setMaxVelocity((12 * Math.random()) + 12);//randomly change speed
+     }
+     if (e.getDistance() > 150) {//if distance is greater than 150
+         gunTurnAmt = robocode.util.Utils.normalRelativeAngle(absBearing - getGunHeadingRadians() + latVel / 22);//amount to turn our gun, lead just a little bit
+         setTurnGunRightRadians(gunTurnAmt); //turn our gun
+         setTurnRightRadians(robocode.util.Utils.normalRelativeAngle(absBearing - getHeadingRadians() + latVel / getVelocity()));//drive towards the enemies predicted future location
+         setAhead((e.getDistance()) + 5 * moveDirection);//move forward
+         double bulletPower = 3;
+         bulletPower = Math.min(bulletPower, e.getEnergy() >= 4 ? (e.getEnergy() + 2) / 6 : e.getEnergy() / 4);
+         fire(3);
+     } else {//if we are close enough...
+         gunTurnAmt = robocode.util.Utils.normalRelativeAngle(absBearing - getGunHeadingRadians() + latVel / 15);//amount to turn our gun, lead just a little bit
+         setTurnGunRightRadians(gunTurnAmt);//turn our gun
+         setTurnLeft(-90 - e.getBearing()); //turn perpendicular to the enemy
+         setAhead((e.getDistance() + 5) * moveDirection);//move forward
+         double bulletPower = 3;
+         bulletPower = Math.min(bulletPower, e.getEnergy() >= 4 ? (e.getEnergy() + 2) / 6 : e.getEnergy() / 4);
+         fire(3);
+     }
     }
 
     public void checkWallDistance() {
@@ -100,6 +104,15 @@ public class Dictator extends TeamRobot {
         setTurnRight(enemy.getBearing() + 90);
         setAhead(100 * moveDirection);
 
+    }
+
+
+    public double getFutureX(long when) {
+        return x + Math.sin(Math.toRadians(getHeading())) * getVelocity() * when;
+    }
+
+    public double getFutureY(long when) {
+        return y + Math.cos(Math.toRadians(getHeading())) * getVelocity() * when;
     }
 
     @Override
