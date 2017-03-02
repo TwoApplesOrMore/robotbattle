@@ -17,10 +17,20 @@ public class Dictator extends TeamRobot {
     private EnemyBot enemy = new EnemyBot();
     private byte moveDirection = 1;
 
+    private int wallMargin = 45;
+    private int tooCloseToWall = 0;
+
+
+    int x,y;
+
     /**
      * Run method executes the start of the battle and robot behaviour
      */
     public void run() {
+
+      initiateColorScheme();
+
+
         teammates.add(new Teammate(this.getName(), this.getX(), this.getY()));
         Serializable message = this.getName() +";"+ this.getX() + ";"+ this.getY();
         broadcastMessage(message);
@@ -70,24 +80,39 @@ public class Dictator extends TeamRobot {
         }
     }
 
+    public void checkWallDistance() {
+        if (closeToWallConditions()) {
+            doMove();
+        }
+    }
+
+    public boolean closeToWallConditions() {
+        return ((getX() <= wallMargin || getX() >= getBattleFieldWidth() - wallMargin ||
+                getY() <= wallMargin || getY() >= getBattleFieldHeight() - wallMargin)
+        );
+    }
+
     public void doMove() {
         if (getVelocity() == 0)
             moveDirection *= -1;
 
         // circle our enemy
         setTurnRight(enemy.getBearing() + 90);
-        setAhead(1000 * moveDirection);
+        setAhead(100 * moveDirection);
 
     }
 
     @Override
     public void onHitWall(HitWallEvent h) {
-        moveDirection -= moveDirection;
+        setTurnLeft(-90 - enemy.getBearing()); //turn perpendicular to the enemy
+        turnLeft(45);
+        doMove();
     }
 
     @Override
     public void onHitByBullet(HitByBulletEvent h) {
-        doMove();
+        setTurnLeft(-90 - enemy.getBearing()); //turn perpendicular to the enemy
+        setAhead(enemy.getDistance());
     }
 
     private int randomPosition(int min, int max) {
